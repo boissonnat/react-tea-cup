@@ -48,6 +48,7 @@ import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
 import * as Rest from './Samples/Rest'
 import * as TimeSample from './Samples/TimeSample'
+import * as TopicsSample from './Samples/Topics'
 
 
 enum Tab {
@@ -165,6 +166,7 @@ interface Samples {
     readonly sful: Sful.Model
     readonly rest: Rest.Model
     readonly time: TimeSample.Model
+    readonly topics: TopicsSample.Model
 }
 
 
@@ -178,6 +180,7 @@ type Msg
     | { type: "sful", child: Sful.Msg }
     | { type: "rest", child: Rest.Msg }
     | { type: "timeSample", child: TimeSample.Msg }
+    | { type: "topicSample", child: TopicsSample.Msg }
     | { type: "urlChange", location: Location }
     | { type: "newUrl", url: string }
     | { type: "noop" }
@@ -197,6 +200,7 @@ function initSamples(): [Model, Cmd<Msg>] {
     const sful = Sful.init();
     const rest = Rest.init();
     const time = TimeSample.init();
+    const topics = TopicsSample.init();
     return [
         {
             tag: "samples",
@@ -209,7 +213,8 @@ function initSamples(): [Model, Cmd<Msg>] {
                 clsm: clsm[0],
                 sful: sful[0],
                 rest: rest[0],
-                time: time[0]
+                time: time[0],
+                topics: topics[0],
             }
         },
         Cmd.batch([
@@ -221,7 +226,8 @@ function initSamples(): [Model, Cmd<Msg>] {
             clsm[1].map(mapClsm),
             sful[1].map(mapSful),
             rest[1].map(mapRest),
-            time[1].map(mapTimeSample)
+            time[1].map(mapTimeSample),
+            topics[1].map(mapTopicSample)
         ])
     ];
 }
@@ -342,6 +348,14 @@ function mapTimeSample(m: TimeSample.Msg) : Msg {
         child: m
     }
 }
+
+function mapTopicSample(m: TopicsSample.Msg) : Msg {
+    return {
+        type: "topicSample",
+        child: m
+    }
+}
+
 
 
 function view(dispatch: Dispatcher<Msg>, model: Model) {
@@ -575,6 +589,8 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
             {Rest.view(map(dispatch, mapRest), samples.rest)}
             <h2>Time</h2>
             {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
+            <h2>Topics</h2>
+            {TopicsSample.view(map(dispatch, mapTopicSample), samples.topics)}
         </div>
     )
 }
@@ -659,6 +675,13 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                     return [{...s, time: macTime[0]}, macTime[1].map(mapTimeSample)];
                 }
             );
+        case "topicSample":
+            return mapSample(
+                (s:Samples) => {
+                    const macTopics = TopicsSample.update(msg.child, s.topics);
+                    return [{...s, topics: macTopics[0]}, macTopics[1].map(mapTopicSample)];
+                }
+            );
 
         case "urlChange":
             return init(msg.location);
@@ -689,15 +712,16 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
 function subscriptions(model: Model) : Sub<Msg> {
     switch (model.tag) {
         case "samples":
-            const { counter, parentChild, raf, time } = model.samples;
+            const { counter, parentChild, raf, time, topics } = model.samples;
             return Sub.batch(
                 [
                     Counter.subscriptions(counter).map(mapCounter),
                     ParentChild.subscriptions(parentChild).map(mapParentChild),
                     Raf.subscriptions(raf).map(mapRaf),
-                    TimeSample.subscriptions(time).map(mapTimeSample)
+                    TimeSample.subscriptions(time).map(mapTimeSample),
+                    TopicsSample.subscriptions(topics).map(mapTopicSample)
                 ]
-            )
+            );
         default:
             return Sub.none();
     }
