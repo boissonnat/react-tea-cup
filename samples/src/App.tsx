@@ -48,7 +48,7 @@ import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
 import * as Rest from './Samples/Rest'
 import * as TimeSample from './Samples/TimeSample'
-
+import * as ContextDispatch from './Samples/ContextDispatch'
 
 enum Tab {
     All, Open, Closed
@@ -146,14 +146,11 @@ interface TodoMvc {
     readonly todoId: Maybe<string>
 }
 
-
 type Model
     = { tag: "home" }
     | { tag: "samples", samples: Samples }
     | { tag: "todo-mvc", todoMvc: TodoMvc }
     | { tag: "not-found" }
-
-
 
 interface Samples {
     readonly counter: Counter.Model
@@ -165,8 +162,8 @@ interface Samples {
     readonly sful: Sful.Model
     readonly rest: Rest.Model
     readonly time: TimeSample.Model
+    readonly contextDispatch: ContextDispatch.Model
 }
-
 
 type Msg
     = { type: "counter", child: Counter.Msg }
@@ -178,6 +175,7 @@ type Msg
     | { type: "sful", child: Sful.Msg }
     | { type: "rest", child: Rest.Msg }
     | { type: "timeSample", child: TimeSample.Msg }
+    | { type: "contextDispatch", child: ContextDispatch.Msg }
     | { type: "urlChange", location: Location }
     | { type: "newUrl", url: string }
     | { type: "noop" }
@@ -197,6 +195,7 @@ function initSamples(): [Model, Cmd<Msg>] {
     const sful = Sful.init();
     const rest = Rest.init();
     const time = TimeSample.init();
+    const contextDispatch = ContextDispatch.init();
     return [
         {
             tag: "samples",
@@ -209,7 +208,8 @@ function initSamples(): [Model, Cmd<Msg>] {
                 clsm: clsm[0],
                 sful: sful[0],
                 rest: rest[0],
-                time: time[0]
+                time: time[0],
+                contextDispatch: contextDispatch[0],
             }
         },
         Cmd.batch([
@@ -221,7 +221,8 @@ function initSamples(): [Model, Cmd<Msg>] {
             clsm[1].map(mapClsm),
             sful[1].map(mapSful),
             rest[1].map(mapRest),
-            time[1].map(mapTimeSample)
+            time[1].map(mapTimeSample),
+            contextDispatch[1].map(mapContextDispatch)
         ])
     ];
 }
@@ -339,6 +340,13 @@ function mapRest(m: Rest.Msg) : Msg {
 function mapTimeSample(m: TimeSample.Msg) : Msg {
     return {
         type: "timeSample",
+        child: m
+    }
+}
+
+function mapContextDispatch(m: ContextDispatch.Msg): Msg {
+    return {
+        type: "contextDispatch",
         child: m
     }
 }
@@ -575,6 +583,8 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
             {Rest.view(map(dispatch, mapRest), samples.rest)}
             <h2>Time</h2>
             {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
+            <h2>Context dispatch</h2>
+            <ContextDispatch.View dispatch={map(dispatch, mapContextDispatch)} model={samples.contextDispatch}/>
         </div>
     )
 }
@@ -657,6 +667,13 @@ function update(msg: Msg, model: Model): [Model, Cmd<Msg>] {
                 (s:Samples) => {
                     const macTime = TimeSample.update(msg.child, s.time);
                     return [{...s, time: macTime[0]}, macTime[1].map(mapTimeSample)];
+                }
+            );
+        case "contextDispatch":
+            return mapSample(
+                (s:Samples) => {
+                    const macCd = ContextDispatch.update(msg.child, s.contextDispatch);
+                    return [{...s, contextDispatch: macCd[0]}, macCd[1].map(mapContextDispatch)];
                 }
             );
 
