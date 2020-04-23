@@ -76,6 +76,30 @@ function view(dispatch:Dispatcher<Msg>, model: Model) {
 
 The `view` function is invoked by tea-cup at every `update`, for every `Msg` that is dispatched.
 
+#### Using React Function Components
+
+The top-level `Program` expects a given signature for the `view` function. But you can also 
+use pure React FCs if you prefer :
+
+```typescript jsx
+export interface MyButtonProps {
+    label: string;
+    dispatch: Dispatcher<Msg>;
+}
+
+export const MyButton = (props: MyButtonProps) => {
+    const { label } = props;
+    return (
+        <button onClick={() => dispatch({...})}>
+            {label}
+        </button>
+    )   
+}   
+```
+
+> You can also use React `Context` APIs to avoid prop drilling the `dispatch` function,
+> tea-cup has some support for that. Have a look at 
+> the [context dispatch sample](../samples/src/Samples/ContextDispatch/Parent.tsx) for more info.
     
 ### Messages 
 
