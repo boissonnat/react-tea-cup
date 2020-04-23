@@ -48,7 +48,7 @@ import * as ClassMsgs from './Samples/ClassMsgs'
 import * as Sful from './Samples/StatefulInView'
 import * as Rest from './Samples/Rest'
 import * as TimeSample from './Samples/TimeSample'
-import * as ContextDispatch from './Samples/ContextDispatch'
+import * as ContextDispatch from './Samples/ContextDispatch/Parent'
 
 enum Tab {
     All, Open, Closed
