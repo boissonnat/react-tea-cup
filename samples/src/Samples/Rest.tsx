@@ -106,7 +106,7 @@ export function view(dispatch:Dispatcher<Msg>, model: Model) {
         case "load-error":
             content =
                 <p>
-                    Ooops ! There was an error : {model.error}
+                    Ooops ! There was an error : {model.error.message}
                 </p>;
             break;
         case "loaded":

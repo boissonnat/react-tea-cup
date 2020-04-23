@@ -584,7 +584,7 @@ function viewSamples(dispatch: Dispatcher<Msg>, samples: Samples) {
             <h2>Time</h2>
             {TimeSample.view(map(dispatch, mapTimeSample), samples.time)}
             <h2>Context dispatch</h2>
-            <ContextDispatch.View dispatch={map(dispatch, mapContextDispatch)} model={samples.contextDispatch}/>
+            {ContextDispatch.view(map(dispatch, mapContextDispatch), samples.contextDispatch)}
         </div>
     )
 }
