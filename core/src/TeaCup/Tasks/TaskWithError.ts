@@ -26,8 +26,13 @@
 import { Cmd } from '../Cmd';
 import { Dispatcher } from '../Dispatcher';
 import { Err, Result } from '../Result';
+import {Task} from "./Task";
+import {TaskWithoutError} from "./TaskWithoutError";
+import {Maybe, nothing} from "../Maybe";
+import {TParallel} from "./TParallel";
 
 export abstract class TaskWithError<E, R> {
+
   /**
    * To be implemented by concrete Tasks.
    * @param callback the callback to call when the task is ran
@@ -65,6 +70,16 @@ export abstract class TaskWithError<E, R> {
   attempt<M>(toMsg: (r: Result<E, R>) => M): Cmd<M> {
     return new TECmd(this, toMsg);
   }
+
+  /**
+   * Runs tasks in parallel
+   * @param t the task to be run in parallel with this task
+   * @param f a function that maps the results of the 2 parallel tasks
+   */
+  parallel<T2, R2>(t: TaskWithError<E, T2> | TaskWithoutError<T2>, f: (a: R, b: T2) => R2): TaskWithError<E, R2> {
+    return new TParallel(this, t, f);
+  }
+
 }
 
 class TECmd<E, R, M> extends Cmd<M> {
